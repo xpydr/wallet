@@ -7,7 +7,7 @@ contract MultiSigWallet {
         address indexed owner,
         uint indexed txIndex,
         address indexed to,
-        uint value,https://remix.ethereum.org/assets/img/learnEthLogo.webp
+        uint value,
         bytes data
     );
     event ConfirmTransaction(address indexed owner, uint indexed txIndex);
