@@ -1,56 +1,46 @@
 <template>  
-  <div class="m-8 grid grid-rows-4">
+  <!-- <div class="m-8 grid grid-rows-4"> -->
 
     <div class="border text-sm p-4">
 
       <new-wallet></new-wallet>
-      <div class="p-4">
+      <!-- <div class="p-4"> -->
 
-        <p>Address: {{ address }}</p>
-        <p>Balance: {{ balance }}</p>
-      </div>
+        <!-- <p>Address: {{ address }}</p> -->
+        <!-- <p>Balance: {{ balance }}</p> -->
+      <!-- </div> -->
     </div>
+    
 
-
-    <hr>
+    <!-- <hr>
     <div class="border">
       <div class="grid grid-cols-3 gap-4">
         <input class="border p-2 m-4 col-span-2" v-model="to" placeholder="Recipient Address">
         <input class="border p-2 m-4" v-model="amount" placeholder="Amount ETH">
   
       </div>
-      <button class="border w-full p-4 m-2 border-white " @click="sendEth()">Send ETH</button>
+      <button class="border w-full p-4 m-2 border-white " @click="sendEth()">Send ETH</button>  -->
 
-    </div>
-    <p :="tx">{{ tx }}</p>
-  </div>
+    <!-- </div> -->
+  <!-- </div> -->
 </template>
 
 
-<script type="module">
-import { ethers } from "ethers";
-import dotenv from 'dotenv';
+<script setup lang="ts">
+// async function sendEth() {
+//   if (!wallet) { alert("Create wallet first."); return; }
+//   if (!to.value.trim() || !amount.value.trim()) { alert("Fill recipient and amount"); return; }
 
-let wallet, provider;
-const address = ref('');
-const balance = ref('');
-const mnemonic = ref('');
-const amount = ref('');
-
-async function sendEth() {
-  if (!wallet) { alert("Create wallet first."); return; }
-  if (!to.value.trim() || !amount.value.trim()) { alert("Fill recipient and amount"); return; }
-
-  try {
-    let res = await wallet.sendTransaction({
-      to: to.value.trim(),
-      value: ethers.parseEther(amount.value)
-    });
-    tx.value = res.hash;
-    await res.wait();
-    alert("✅ Transaction confirmed");
-  } catch (err) {
-    alert("Error: " + err.message);
-  }
-}
+//   try {
+//     let res = await wallet.sendTransaction({
+//       to: to.value.trim(),
+//       value: ethers.parseEther(amount.value)
+//     });
+//     tx.value = res.hash;
+//     await res.wait();
+//     alert("✅ Transaction confirmed");
+//   } catch (err) {
+//     alert("Error: " + err.message);
+//   }
+// }
 </script>
