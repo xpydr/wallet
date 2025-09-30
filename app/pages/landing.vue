@@ -7,6 +7,7 @@
 			<div class="text-xl flex justify-around w-full">
 				<p class="hover:cursor-pointer">New</p>
 				<p class="hover:cursor-pointer">Load</p>
+				
 			</div>
 	
 			<div>
