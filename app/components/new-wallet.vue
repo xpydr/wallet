@@ -1,14 +1,15 @@
 <template>
 	<div class="flex flex-row gap-4">
-		<label><input v-model="walletMode" type="radio" name="12-word" value=12 class="mx-2">12-word</label>
-		<label><input v-model="walletMode" type="radio" name="15-word" value=15 class="mx-2">15-word</label>
-		<label><input v-model="walletMode" type="radio" name="18-word" value=18 class="mx-2">18-word</label>
-		<label><input v-model="walletMode" type="radio" name="21-word" value=21 class="mx-2">21-word</label>
-		<label><input v-model="walletMode" type="radio" name="24-word" value=24 class="mx-2">24-word</label>
+		<label><input v-model="walletMode" type="radio" name="word-count" :value=12 class="mx-2">12-word</label>
+		<label><input v-model="walletMode" type="radio" name="word-count" :value=15 class="mx-2">15-word</label>
+		<label><input v-model="walletMode" type="radio" name="word-count" :value=18 class="mx-2">18-word</label>
+		<label><input v-model="walletMode" type="radio" name="word-count" :value=21 class="mx-2">21-word</label>
+		<label><input v-model="walletMode" type="radio" name="word-count" :value=24 class="mx-2">24-word</label>
 	</div>
-	<div class="grid grid-cols-3 gap-4">
-		<input class="border p-2 m-4 col-span-2" v-model="mnemonicInput" placeholder="Enter mnemonic">
-		<button class="border border-black p-2 m-4" @click="createWallet(walletMode)">Create Wallet</button>
+	<div class="flex flex-col gap-4">
+		<!-- <input class="border p-2 m-4 col-span-2" v-model="mnemonicInput" placeholder="Enter mnemonic"> -->
+		<button class="border border-black p-2 m-4 mx-24 overflow-hidden min-w-fit" @click="createWallet(walletMode)">Create
+			Wallet</button>
 		<div>
 			<p v-if="errorMessage" class="text-red-500">{{ errorMessage }}</p>
 			<p v-if="address">Address: {{ address }}</p>
@@ -44,12 +45,11 @@ async function fetchBalance(address: string): Promise<void> {
 	balance.value = response.balance
 }
 
-function createWallet(wordCount: 12 | 15 | 18 | 21 | 24): {
+async function createWallet(wordCount: 12 | 15 | 18 | 21 | 24): Promise<{
 	address: string;
 	mnemonic: string;
-	privateKey: string;
 	wordCount: number;
-} {
+}> {
 
 	try {
 		// Map word count to entropy size (in bits)
@@ -86,17 +86,39 @@ function createWallet(wordCount: 12 | 15 | 18 | 21 | 24): {
 		return {
 			address: wallet.value.address,
 			mnemonic: mnemonic.phrase,
-			privateKey: wallet.value.privateKey,
 			wordCount: mnemonic.phrase.split(" ").length,
 		};
 	} catch (error) {
-		errorMessage.value = `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+		errorMessage.value = `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
+		return {
+			address: "",
+			mnemonic: "",
+			wordCount: 0,
+		};
 	}
 }
 </script>
 
 <style scoped>
-label:hover input:hover {
+label {
 	cursor: pointer;
+}
+
+input[type="radio"] {
+	cursor: pointer;
+}
+
+button {
+	cursor: pointer;
+	transition: background-color 0.2s;
+}
+
+button:hover {
+	background-color: #f0f0f0;
+}
+
+button:disabled {
+	cursor: not-allowed;
+	opacity: 0.5;
 }
 </style>
