@@ -1,12 +1,20 @@
 <template>
-    <div class="flex flex-col justify-center items-center gap-16">
-        <div>
-            <button @click="isDeposit = true" class="border p-4">Deposit</button>
-            <button @click="isDeposit = false" class="border p-4">Withdraw</button>
+    <div class="grid grid-cols-2 w-full items-center justify-center text-center">
+        <div class="flex flex-col gap-4 mx-8">
+            <button @click="isDeposit = true" class="border p-4" active-class="bg-black"
+                :class="[isDeposit ? 'border-cyan-300' : '']">Deposit</button>
+            <button @click="isDeposit = false" class="border p-4"
+                :class="[!isDeposit ? 'border-cyan-300' : '']">Withdraw</button>
 
         </div>
-        <div v-if="isDeposit">
-            <qrcode-vue :value="hexInput" :size="200" level="H" render-as="svg" />
+        <div>
+            <div v-show="isDeposit" class="flex justify-center">
+                <qrcode-vue :value="hexInput" :size="200" level="H" render-as="svg" />
+            </div>
+            <div v-show="!isDeposit">
+                
+            </div>
+
         </div>
     </div>
 </template>
@@ -35,7 +43,9 @@ button {
     transition: background-color 0.2s;
 }
 
-button:hover {
+button:hover,
+button:active,
+button.active {
     background-color: #f0f0f0;
 }
 
