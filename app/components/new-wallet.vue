@@ -1,20 +1,35 @@
 <template>
-	<div class="flex flex-row gap-4">
-		<label><input v-model="walletMode" type="radio" name="word-count" :value=12 class="mx-2">12-word</label>
-		<label><input v-model="walletMode" type="radio" name="word-count" :value=15 class="mx-2">15-word</label>
-		<label><input v-model="walletMode" type="radio" name="word-count" :value=18 class="mx-2">18-word</label>
-		<label><input v-model="walletMode" type="radio" name="word-count" :value=21 class="mx-2">21-word</label>
-		<label><input v-model="walletMode" type="radio" name="word-count" :value=24 class="mx-2">24-word</label>
+
+	<div class="flex items-center pb-2">
+		<div class="flex flex-row flex-1 gap-4">
+			<label><input v-model="walletMode" type="radio" name="word-count" :value=12 class="mx-2">12-word</label>
+			<label><input v-model="walletMode" type="radio" name="word-count" :value=15 class="mx-2">15-word</label>
+			<label><input v-model="walletMode" type="radio" name="word-count" :value=18 class="mx-2">18-word</label>
+			<label><input v-model="walletMode" type="radio" name="word-count" :value=21 class="mx-2">21-word</label>
+			<label><input v-model="walletMode" type="radio" name="word-count" :value=24 class="mx-2">24-word</label>
+		</div>
+		<button class="border border-black p-2 overflow-hidden min-w-fit border-cyan-300 text-cyan-300" @click="createWallet(walletMode)">
+			Generate
+		</button>
+
 	</div>
 	<div class="flex flex-col gap-4">
 		<!-- <input class="border p-2 m-4 col-span-2" v-model="mnemonicInput" placeholder="Enter mnemonic"> -->
-		<button class="border border-black p-2 m-4 mx-24 overflow-hidden min-w-fit" @click="createWallet(walletMode)">Create
-			Wallet</button>
-		<div>
-			<p v-if="errorMessage" class="text-red-500">{{ errorMessage }}</p>
+		<hr>
+		<p v-if="errorMessage" class="text-red-500">{{ errorMessage }}</p>
+		<div v-if="wallet" class="mx-2">
 			<p v-if="address">Address: {{ address }}</p>
 			<p v-if="balance">Balance: {{ balance }} ETH</p>
+			<br>
+			<p>Seed: {{ wallet.mnemonic?.phrase ?? 'Error' }}</p>
+			{{console.log(wallet.mnemonic?.phrase ?? 'Error')}}
+			<br>
 		</div>
+		
+		<div v-if="wallet" class="mx-2">
+			<wallet-actions></wallet-actions>
+		</div>
+
 	</div>
 </template>
 
