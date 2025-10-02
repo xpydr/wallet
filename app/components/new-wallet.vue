@@ -8,9 +8,17 @@
 			<label><input v-model="walletMode" type="radio" name="word-count" :value=21 class="mx-2">21-word</label>
 			<label><input v-model="walletMode" type="radio" name="word-count" :value=24 class="mx-2">24-word</label>
 		</div>
-		<button class="border border-black p-2 overflow-hidden min-w-fit border-cyan-300 text-cyan-300" @click="createWallet(walletMode)">
+		<div class="mx-4 hover:cursor-pointer" @click="lock = !lock">
+			<Icon v-if="lock" name="zondicons:lock-closed" size="24" />
+			<Icon v-else name="bxs:lock-open" size="24" />
+		</div>
+		<button v-if="!lock" class="border border-black p-2 overflow-hidden min-w-fit border-cyan-300 text-cyan-300"
+			@click="createWallet(walletMode)">
 			Generate
 		</button>
+		<div v-else class="border border-black p-2 overflow-hidden min-w-fit border-cyan-300 text-cyan-300 bg-black hover:cursor-not-allowed">
+			Generate
+		</div>
 
 	</div>
 	<div class="flex flex-col gap-4">
@@ -23,10 +31,10 @@
 			<br>
 			<!-- <p>Private Key: {{ wallet }}</p> -->
 			<p>Seed: {{ wallet.mnemonic?.phrase ?? 'Error' }}</p>
-			{{console.log(wallet.mnemonic?.phrase ?? 'Error')}}
+			{{ console.log(wallet.mnemonic?.phrase ?? 'Error') }}
 			<br>
 		</div>
-		
+
 		<div v-if="wallet" class="mx-2">
 			<wallet-actions />
 		</div>
@@ -47,10 +55,13 @@ interface BalanceResponse {
 const address = ref<string>('')
 const balance = ref<string>('')
 const mnemonicInput = ref<string>('')
+const lock = ref<boolean>(false)
 
 const errorMessage = ref<string>('')
 const wallet = ref<HDNodeWallet | null>(null)
 const walletMode = ref<12 | 15 | 18 | 21 | 24>(12)
+
+
 
 async function fetchBalance(address: string): Promise<void> {
 	// Fetch balance from server route

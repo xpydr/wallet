@@ -5,13 +5,12 @@
                 :class="[isDeposit ? 'border-cyan-300' : '']">Deposit</button>
             <button @click="isDeposit = false" class="border p-4"
                 :class="[!isDeposit ? 'border-cyan-300' : '']">Withdraw</button>
-
         </div>
         <div>
             <div v-show="isDeposit" class="flex justify-center">
                 <qrcode-vue :value="hexInput" :size="200" level="H" render-as="svg" />
             </div>
-            <div v-show="!isDeposit" class="flex gap-2 flex-col">
+            <div v-show="!isDeposit" class="flex gap-2 flex-col text-left m-4">
                 <label>To: <input v-model="to" placeholder="0x..."/></label>
                 <label>Amount: <input v-model="amount" type="number" placeholder="ETH" /></label>
             </div>
