@@ -21,13 +21,14 @@
 			<p v-if="address">Address: {{ address }}</p>
 			<p v-if="balance">Balance: {{ balance }} ETH</p>
 			<br>
+			<!-- <p>Private Key: {{ wallet }}</p> -->
 			<p>Seed: {{ wallet.mnemonic?.phrase ?? 'Error' }}</p>
 			{{console.log(wallet.mnemonic?.phrase ?? 'Error')}}
 			<br>
 		</div>
 		
 		<div v-if="wallet" class="mx-2">
-			<wallet-actions></wallet-actions>
+			<wallet-actions />
 		</div>
 
 	</div>
@@ -62,6 +63,7 @@ async function fetchBalance(address: string): Promise<void> {
 
 async function createWallet(wordCount: 12 | 15 | 18 | 21 | 24): Promise<{
 	address: string;
+	// privateKey: string;
 	mnemonic: string;
 	wordCount: number;
 }> {
@@ -89,17 +91,19 @@ async function createWallet(wordCount: 12 | 15 | 18 | 21 | 24): Promise<{
 
 		// Create mnemonic from entropy
 		const mnemonic = ethers.Mnemonic.fromEntropy(entropy);
+		console.log(mnemonic)
 
 		// Create HD wallet from mnemonic 
 		wallet.value = ethers.Wallet.fromPhrase(mnemonic.phrase);
 
-		console.log(wallet.value);
+		console.log(wallet);
 
 		address.value = wallet.value.address
 		fetchBalance(wallet.value.address)
 
 		return {
 			address: wallet.value.address,
+			// privateKey: wallet.value.privateKey,
 			mnemonic: mnemonic.phrase,
 			wordCount: mnemonic.phrase.split(" ").length,
 		};
@@ -107,6 +111,7 @@ async function createWallet(wordCount: 12 | 15 | 18 | 21 | 24): Promise<{
 		errorMessage.value = `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
 		return {
 			address: "",
+			// privateKey: "",
 			mnemonic: "",
 			wordCount: 0,
 		};
