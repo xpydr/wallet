@@ -16,7 +16,7 @@
 			@click="createWallet(walletMode)">
 			Generate
 		</button>
-		<div v-else class="border border-black p-2 overflow-hidden min-w-fit border-cyan-300 text-cyan-300 bg-black hover:cursor-not-allowed">
+		<div v-else title="Locked" class="border border-black p-2 overflow-hidden min-w-fit border-cyan-300 text-cyan-300 bg-black hover:cursor-not-allowed">
 			Generate
 		</div>
 
@@ -60,8 +60,6 @@ const lock = ref<boolean>(false)
 const errorMessage = ref<string>('')
 const wallet = ref<HDNodeWallet | null>(null)
 const walletMode = ref<12 | 15 | 18 | 21 | 24>(12)
-
-
 
 async function fetchBalance(address: string): Promise<void> {
 	// Fetch balance from server route
@@ -108,6 +106,8 @@ async function createWallet(wordCount: 12 | 15 | 18 | 21 | 24): Promise<{
 		wallet.value = ethers.Wallet.fromPhrase(mnemonic.phrase);
 
 		console.log(wallet);
+		console.log(wallet.value.signMessage);
+		console.log(new ethers.SigningKey(wallet.value.privateKey));
 
 		address.value = wallet.value.address
 		fetchBalance(wallet.value.address)

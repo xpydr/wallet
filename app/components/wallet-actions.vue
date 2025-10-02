@@ -7,14 +7,14 @@
                 :class="[!isDeposit ? 'border-cyan-300' : '']">Withdraw</button>
         </div>
         <div>
+            <!-- Deposit and withdraw actions -->
             <div v-show="isDeposit" class="flex justify-center">
                 <qrcode-vue :value="hexInput" :size="200" level="H" render-as="svg" />
             </div>
             <div v-show="!isDeposit" class="flex gap-2 flex-col text-left m-4">
-                <label>To: <input v-model="to" placeholder="0x..."/></label>
-                <label>Amount: <input v-model="amount" type="number" placeholder="ETH" /></label>
+                <label>To: <input v-model="to" placeholder="0x..." class="w-7/8" /></label>
+                <label>Amount: <input v-model="amount" type="number" placeholder="ETH" class="w-1/4" /></label>
             </div>
-
         </div>
     </div>
 </template>
@@ -31,22 +31,38 @@ const qrError = ref<string>('')
 
 const isDeposit = ref<boolean>(true)
 
-// async function sendEth() {
-//   if (!wallet) { alert("Create wallet first."); return; }
-//   if (!to.value.trim() || !amount.value.trim()) { alert("Fill recipient and amount"); return; }
+async function sendEth(): Promise<void> {
+  try {
+    // 4. Get the current nonce for the wallet
+    const nonce = await wallet.getTransactionCount("pending");
 
-//   try {
-//     let res = await wallet.sendTransaction({
-//       to: to.value.trim(),
-//       value: ethers.parseEther(amount.value)
-//     });
-//     tx.value = res.hash;
-//     await res.wait();
-//     alert("✅ Transaction confirmed");
-//   } catch (err) {
-//     alert("Error: " + err.message);
-//   }
-// }
+    // 5. Convert ETH amount to wei
+    const amount = ethers.utils.parseEther(amountInEther);
+
+    // 6. Estimate gas (optional, for better control)
+    const gasPrice = await provider.getGasPrice();
+    const gasLimit = 21000; // Standard gas limit for ETH transfer
+
+    // 7. Create the transaction object
+    const tx = {
+      to: recipientAddress,
+      value: amount,
+      gasPrice: gasPrice,
+      gasLimit: gasLimit,
+      nonce: nonce,
+    };
+
+    // 8. Sign and send the transaction
+    const transaction = await wallet.sendTransaction(tx);
+    console.log("Transaction hash:", transaction.hash);
+
+    // 9. Wait for the transaction to be mined
+    const receipt = await transaction.wait();
+    console.log("Transaction confirmed in block:", receipt.blockNumber);
+  } catch (error) {
+    console.error("Error sending ETH:", error);
+  }
+}
 
 watch(hexInput, (newValue) => {
     if (newValue && !/^[0-9A-Fa-f]*$/.test(newValue)) {
