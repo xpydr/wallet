@@ -9,18 +9,24 @@
         <div>
             <!-- Deposit and withdraw actions -->
             <div v-show="isDeposit" class="flex justify-center">
-                <qrcode-vue :value="hexInput" :size="150" foreground="black" background="white" level="H"
+                <qrcode-vue :value="props.hexInput" :size="150" foreground="black" background="white" level="H"
                     render-as="svg" />
             </div>
             <div v-show="!isDeposit" class="flex gap-2 flex-col text-left m-4">
                 <label>To: <input v-model="to" placeholder="0x..." class="w-7/8" /></label>
                 <label>Amount: <input v-model="amount" type="number" placeholder="ETH" class="w-1/4" /></label>
+                <button @click="sendEth" class="border p-2">Send</button>
             </div>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
+interface Props {
+    hexInput: string
+}
+
+const props = defineProps<Props>();
 
 import QrcodeVue from 'qrcode.vue';
 

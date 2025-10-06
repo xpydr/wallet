@@ -35,7 +35,7 @@
 		</div>
 
 		<div v-if="wallet" class="mx-2">
-			<wallet-actions />
+			<wallet-actions :hex-input="wallet.address" />
 		</div>
 
 	</div>
