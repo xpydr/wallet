@@ -12,6 +12,8 @@ interface TxParams {
 	gasPrice?: bigint;
 }
 
+
+
 export async function sendTransaction(params: TxParams): Promise<string> {
 	if (!signer) throw new Error("No signer available");
 	const tx: ethers.TransactionRequest = {
@@ -41,7 +43,6 @@ export async function createWallet(wordCount: WalletMode): Promise<{
 	address: string;
 	mnemonic: string;
 	wordCount: number;
-	txCount: number;
 	balance: string;
 }> {
 	try {
@@ -56,26 +57,13 @@ export async function createWallet(wordCount: WalletMode): Promise<{
 
 		const bits = entropyBits[wordCount];
 		if (!bits) {
-			throw new Error("Invalid word count. Choose 12, 15, 18, 21, or 24.")
+			throw new Error("Invalid word count")
 		}
 
-		// Convert bits to bytes 
 		const entropyBytes = bits / 8;
-
-		// Generate random entropy
 		const entropy = ethers.randomBytes(entropyBytes);
-
-		// Create mnemonic from entropy
 		const mnemonic = ethers.Mnemonic.fromEntropy(entropy);
-
-		// Create HD wallet from mnemonic 
 		const wallet = ethers.Wallet.fromPhrase(mnemonic.phrase);
-
-		const apiKey = process.env.API_KEY
-		const provider = new ethers.JsonRpcProvider(`https://eth-mainnet.alchemyapi.io/v2/${apiKey}`);
-
-		// let txCount: number = await provider?.getTransactionCount(wallet.address) ?? 0;
-		let txCount = 0;	
 
 		let balance: string = await fetchBalance(wallet.address)
 
@@ -83,7 +71,6 @@ export async function createWallet(wordCount: WalletMode): Promise<{
 			address: wallet.address,
 			mnemonic: mnemonic.phrase,
 			wordCount: mnemonic.phrase.split(" ").length,
-			txCount: txCount,
 			balance: balance
 		};
 	} catch (error) {
@@ -92,7 +79,6 @@ export async function createWallet(wordCount: WalletMode): Promise<{
 			address: "",
 			mnemonic: "",
 			wordCount: 0,
-			txCount: 0,
 			balance: ""
 		};
 	}

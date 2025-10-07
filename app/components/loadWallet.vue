@@ -77,4 +77,12 @@ async function createWallet() {
     errorMessage.value = `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
   }
 }
+// watch(hexInput, (newValue) => {
+//     if (newValue && !/^[0-9A-Fa-f]*$/.test(newValue)) {
+//         qrError.value = 'Please enter a valid hexadecimal string'
+//     } else {
+//         qrError.value = ''
+//     }
+// })
+
 </script>

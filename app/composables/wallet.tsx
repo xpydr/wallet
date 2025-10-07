@@ -3,7 +3,6 @@ import {
   sendTxApi,
   createWallet
 } from '@/services/walletService';
-import { ethers } from 'ethers';
 import type { TxBody, WalletMode } from '~/types';
 
 const wallet = ref<Awaited<ReturnType<typeof createWallet>> | null>(null);
@@ -25,4 +24,3 @@ export function useWallet() {
   }
   return { txHash, sendTx };
 }
-
