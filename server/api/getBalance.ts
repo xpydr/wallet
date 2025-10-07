@@ -1,4 +1,3 @@
-// server/api/getBalance.ts
 import { ethers } from 'ethers'
 
 export default defineEventHandler(async (event) => {

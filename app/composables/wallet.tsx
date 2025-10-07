@@ -3,13 +3,15 @@ import {
   sendTxApi,
   createWallet
 } from '@/services/walletService';
-import type { WalletMode } from '~/types';
+import { ethers } from 'ethers';
+import type { TxBody, WalletMode } from '~/types';
 
-export function useCreate(walletMode: Ref<WalletMode>) {
-  const wallet = ref<Awaited<ReturnType<typeof createWallet>> | null>(null);
+const wallet = ref<Awaited<ReturnType<typeof createWallet>> | null>(null);
+
+export function useCreate(walletMode: WalletMode) {
 
   async function generate() {
-    wallet.value = await createWallet(walletMode.value);
+    wallet.value = await createWallet(walletMode);
   }
   return { wallet, generate };
 }
@@ -23,3 +25,4 @@ export function useWallet() {
   }
   return { txHash, sendTx };
 }
+
