@@ -49,7 +49,7 @@
 					</div>
 				</div>
 
-				<a v-if="txHash && !isDeposit" href="https://sepolia.etherscan.io/tx/">{{ txHash }}</a>
+				<a v-if="txHash && !isDeposit" :href="`https://sepolia.etherscan.io/tx/${txHash}`" target="_blank" rel="noopener noreferrer">{{ txHash }}</a>
 			</div>
 		</div>
 	</div>
@@ -63,7 +63,7 @@ import type { WalletMode } from '~/types';
 const walletModes = [12, 15, 18, 21, 24]
 
 const walletMode = ref<WalletMode>(12);
-const error = ref<any>(null); // Store errors
+const error = ref<any>(null);
 const { txHash, sendTx } = useWallet();
 const to = ref<string>('')
 const amountInEther = ref<string>('')
@@ -77,7 +77,7 @@ interface Wallet {
 	mnemonic?: string;
 }
 
-const myWallet = ref<Wallet | null>(null); // Strongly typed ref
+const myWallet = ref<Wallet | null>(null);
 
 async function generateWallet(): Promise<void> {
 	try {
