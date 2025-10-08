@@ -1,44 +1,20 @@
 import { ethers, HDNodeWallet } from 'ethers'
 import type { TxBody, WalletMode } from '~/types';
 
-interface BalanceResponse {
-	balance: string
+
+export async function sendTxApi(payload: TxBody) {
+	try {
+		// return await $fetch<{ hash: string }>('/api/sendTx', {
+		const res = await $fetch('/api/sendTx', {
+			method: 'POST',
+			body: payload
+		});
+		return res
+	} catch (err) {
+		console.error(err)
+	}
 }
-interface TxParams {
-	to: string;
-	value?: string | number | bigint;
-	data?: string;
-	gasLimit?: bigint;
-	gasPrice?: bigint;
-}
-
-
-
-export async function sendTransaction(params: TxParams): Promise<string> {
-	if (!signer) throw new Error("No signer available");
-	const tx: ethers.TransactionRequest = {
-		to: params.to,
-		value:
-			params.value !== undefined
-				? ethers.parseEther(params.value.toString())
-				: undefined,
-		data: params.data,
-		gasLimit: params.gasLimit,
-		gasPrice: params.gasPrice,
-	};
-	const res = await signer.sendTransaction(tx);
-	return res.hash;
-}
-
-let signer: ethers.Signer | null = null;
-
-export async function sendTxApi(payload: any) {
-	return await $fetch<{ hash: string }>('/api/sendTx', {
-		method: 'POST',
-		body: payload
-	});
-}
-
+	
 export async function createWallet(wordCount: WalletMode): Promise<{
 	address: string;
 	mnemonic: string;
@@ -84,17 +60,9 @@ export async function createWallet(wordCount: WalletMode): Promise<{
 	}
 }
 
-export function useWallet() {
-
-	async function sendTx(to: string, value: string) {
-		return await $fetch('/api/sendTx', {
-			method: 'POST',
-			body: { to, value }
-		});
-	}
-	return { sendTx };
+interface BalanceResponse {
+	balance: string
 }
-
 export async function fetchBalance(address: string): Promise<string> {
 	const response = await $fetch<BalanceResponse>('/api/getBalance', {
 		method: 'POST',

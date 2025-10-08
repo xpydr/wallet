@@ -7,8 +7,7 @@ import type { TxBody, WalletMode } from '~/types';
 
 const wallet = ref<Awaited<ReturnType<typeof createWallet>> | null>(null);
 
-export function useCreate(walletMode: WalletMode) {
-
+export async function useCreate(walletMode: WalletMode) {
   async function generate() {
     wallet.value = await createWallet(walletMode);
   }
@@ -19,8 +18,14 @@ export function useWallet() {
   const txHash = ref<string | null>(null);
 
   async function sendTx(to: string, value: string) {
-    const res = await sendTxApi({ to, value });
-    txHash.value = res.hash;
+    try {
+      const res = await sendTxApi({ to, value });
+      if (res) {
+        txHash.value = res.hash;
+      }
+    } catch (err: any) {
+      console.error(err)
+    }
   }
   return { txHash, sendTx };
 }

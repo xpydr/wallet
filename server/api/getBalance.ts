@@ -9,6 +9,10 @@ export default defineEventHandler(async (event) => {
   const provider = new ethers.JsonRpcProvider(
     `https://eth-sepolia.g.alchemy.com/v2/${apiKey}`  
   )
+
+  // const provider = ethers.getDefaultProvider("sepolia");
+
+
   // const balance = await provider.getBalance(address)
   const balance = await provider.getBalance('0x9427CD0567616c596B3D316432B9A9CDd5e4328f')
   return { balance: ethers.formatEther(balance) }

@@ -21,14 +21,14 @@
 	<div class="flex flex-col gap-4">
 		<hr>
 		<p v-if="error" class="text-red-500">{{ error }}</p>
-		<div v-if="wallet.value" class="mx-2">
-			<p v-if="wallet.value.address">Address: {{ wallet.value.address ?? '' }}</p>
-			<p v-if="wallet.value.balance">Balance: {{ wallet.value.balance ?? '' }} ETH</p>
+		<div v-if="myWallet" class="mx-2">
+			<p v-if="myWallet">Address: {{ myWallet?.address }}</p>
+			<p v-if="myWallet">Balance: {{ myWallet?.balance }} ETH</p>
 			<br>
-			<p>Seed: {{ wallet.value.mnemonic }}</p>
+			<p>Seed: {{ myWallet?.mnemonic }}</p>
 			<br>
 		</div>
-		<div v-if="wallet" class="mx-2">
+		<div v-if="myWallet" class="mx-2">
 			<div class="grid grid-cols-2 w-full items-center justify-center text-center">
 				<div class="flex flex-col gap-4 mx-8 mb-8">
 					<button @click="isDeposit = true" class="border p-4" active-class="bg-black"
@@ -38,7 +38,7 @@
 				</div>
 				<div>
 					<div v-show="isDeposit" class="flex justify-center">
-						<qrcode-vue :value="wallet.value.address" :size="150" foreground="black" background="white"
+						<qrcode-vue :value="myWallet?.address" :size="150" foreground="black" background="white"
 							level="H" render-as="svg" />
 					</div>
 					<div v-show="!isDeposit" class="flex gap-2 flex-col text-left m-4">
@@ -48,6 +48,8 @@
 						<button @click="handleSend" class="border p-2">Send</button>
 					</div>
 				</div>
+
+				<a v-if="txHash && !isDeposit" href="https://sepolia.etherscan.io/tx/">{{ txHash }}</a>
 			</div>
 		</div>
 	</div>
@@ -61,7 +63,6 @@ import type { WalletMode } from '~/types';
 const walletModes = [12, 15, 18, 21, 24]
 
 const walletMode = ref<WalletMode>(12);
-const wallet = ref<any>(null); // Store wallet instance
 const error = ref<any>(null); // Store errors
 const { txHash, sendTx } = useWallet();
 const to = ref<string>('')
@@ -69,23 +70,35 @@ const amountInEther = ref<string>('')
 const isDeposit = ref<boolean>(true)
 const lock = ref<boolean>(false)
 
+interface Wallet {
+	address?: string;
+	balance?: string;
+	wordCount?: number;
+	mnemonic?: string;
+}
+
+const myWallet = ref<Wallet | null>(null); // Strongly typed ref
+
 async function generateWallet(): Promise<void> {
 	try {
-		error.value = null;
-		const result = useCreate(walletMode.value)
-		if (result.wallet) {
-			wallet.value = result.wallet;
-			let generate = result.generate;
-			await generate();
-		}
+		const { wallet, generate } = await useCreate(walletMode.value)
+		myWallet.value = wallet.value;
+		await generate();
 	} catch (err: any) {
-		// error.value = err.message;
+		console.error(err.message)
+		error.value = err.message;
 	}
 }
 
 async function handleSend() {
-	const res = await sendTx("0xpydr.eth", "0.01");
-	console.log(res)
+	try {
+		const res = await sendTx("0xaea0Bd7AF7E1f6BC5d2Caf508Ceb195040352A9b", "0.01");
+		console.log(res)
+		console.log(txHash.value)
+	} catch (err: any) {
+		console.error(err)
+		error.value = err.message
+	}
 }
 </script>
 
