@@ -4,17 +4,15 @@ import type { TxBody, WalletMode } from '~/types';
 
 export async function sendTxApi(payload: TxBody) {
 	try {
-		// return await $fetch<{ hash: string }>('/api/sendTx', {
-		const res = await $fetch('/api/sendTx', {
+		return await $fetch<{ hash: string }>('/api/sendTx', {
 			method: 'POST',
 			body: payload
 		});
-		return res
 	} catch (err) {
 		console.error(err)
 	}
 }
-	
+
 export async function createWallet(wordCount: WalletMode): Promise<{
 	address: string;
 	mnemonic: string;

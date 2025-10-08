@@ -41,15 +41,18 @@
 						<qrcode-vue :value="myWallet?.address" :size="150" foreground="black" background="white"
 							level="H" render-as="svg" />
 					</div>
-					<div v-show="!isDeposit" class="flex gap-2 flex-col text-left m-4">
-						<label>To: <input v-model="to" placeholder="0x..." class="w-7/8" /></label>
-						<label>Amount: <input v-model="amountInEther" type="number" placeholder="ETH"
-								class="w-1/4" /></label>
+					<div v-show="!isDeposit && !isLoading" class="flex gap-2 flex-col text-left m-4">
+						<label class="flex gap-2">To: <input v-model="to" placeholder="0x..." class="w-full" /></label>
+						<label class="flex gap-2">Amount: <input v-model="amountInEther" type="number" placeholder="ETH"
+								class="w-full" /></label>
 						<button @click="handleSend" class="border p-2">Send</button>
 					</div>
 				</div>
 
-				<a v-if="txHash && !isDeposit" :href="`https://sepolia.etherscan.io/tx/${txHash}`" target="_blank" rel="noopener noreferrer">{{ txHash }}</a>
+				<p v-if="txHash && !isDeposit" class="flex gap-2">
+					Tx: <a v-if="txHash && !isDeposit" :href="`https://sepolia.etherscan.io/tx/${txHash}`"
+						target="_blank" rel="noopener noreferrer">{{ txHash }}</a>
+				</p>
 			</div>
 		</div>
 	</div>
@@ -68,6 +71,7 @@ const { txHash, sendTx } = useWallet();
 const to = ref<string>('')
 const amountInEther = ref<string>('')
 const isDeposit = ref<boolean>(true)
+const isLoading = ref<boolean>(false)
 const lock = ref<boolean>(false)
 
 interface Wallet {
@@ -92,12 +96,15 @@ async function generateWallet(): Promise<void> {
 
 async function handleSend() {
 	try {
+		isLoading.value = true
 		const res = await sendTx("0xaea0Bd7AF7E1f6BC5d2Caf508Ceb195040352A9b", "0.01");
 		console.log(res)
 		console.log(txHash.value)
 	} catch (err: any) {
 		console.error(err)
 		error.value = err.message
+	} finally {
+		isLoading.value = false
 	}
 }
 </script>
