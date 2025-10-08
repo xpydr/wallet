@@ -1,5 +1,4 @@
 <template>
-
 	<div class="flex items-center pb-2">
 		<div class="flex flex-row flex-1 gap-4">
 			<label v-for="mode in walletModes"> <!-- select mnemonic word count -->
@@ -18,19 +17,17 @@
 			class="border border-black p-2 overflow-hidden min-w-fit border-cyan-300 text-cyan-300 bg-black hover:cursor-not-allowed">
 			Generate
 		</div>
-
 	</div>
 	<div class="flex flex-col gap-4">
 		<hr>
-		<p v-if="error" class="text-red-500">{{ error.value }}</p>
-		<div v-if="wallet" class="mx-2">
-			<p v-if="wallet.value">Address: {{ wallet.value.address }}</p>
-			<p v-if="wallet">Balance: {{ wallet.value.balance }} ETH</p>
+		<p v-if="error" class="text-red-500">{{ error }}</p>
+		<div v-if="wallet.value" class="mx-2">
+			<p v-if="wallet.value.address">Address: {{ wallet.value.address ?? '' }}</p>
+			<p v-if="wallet.value.balance">Balance: {{ wallet.value.balance ?? '' }} ETH</p>
 			<br>
 			<p>Seed: {{ wallet.value.mnemonic }}</p>
 			<br>
 		</div>
-
 		<div v-if="wallet" class="mx-2">
 			<div class="grid grid-cols-2 w-full items-center justify-center text-center">
 				<div class="flex flex-col gap-4 mx-8 mb-8">
@@ -41,8 +38,8 @@
 				</div>
 				<div>
 					<div v-show="isDeposit" class="flex justify-center">
-						<qrcode-vue :value="wallet.value.address" :size="150" foreground="black" background="white" level="H"
-							render-as="svg" />
+						<qrcode-vue :value="wallet.value.address" :size="150" foreground="black" background="white"
+							level="H" render-as="svg" />
 					</div>
 					<div v-show="!isDeposit" class="flex gap-2 flex-col text-left m-4">
 						<label>To: <input v-model="to" placeholder="0x..." class="w-7/8" /></label>
@@ -53,7 +50,6 @@
 				</div>
 			</div>
 		</div>
-
 	</div>
 </template>
 
@@ -83,13 +79,13 @@ async function generateWallet(): Promise<void> {
 			await generate();
 		}
 	} catch (err: any) {
-		error.value = err.message;
+		// error.value = err.message;
 	}
 }
 
 async function handleSend() {
-  const res = await sendTx("0xpydr.eth", "0.1");
-  console.log(res)
+	const res = await sendTx("0xpydr.eth", "0.01");
+	console.log(res)
 }
 </script>
 
