@@ -1,5 +1,5 @@
 import { ethers, HDNodeWallet } from 'ethers'
-import type { TxBody, WalletMode } from '~/types';
+import type { TxBody, WalletMode, EthAddress } from '~/types';
 
 
 export async function sendTxApi(payload: TxBody) {
@@ -61,7 +61,7 @@ export async function createWallet(wordCount: WalletMode): Promise<{
 interface BalanceResponse {
 	balance: string
 }
-export async function fetchBalance(address: string): Promise<string> {
+export async function fetchBalance(address: EthAddress): Promise<string> {
 	const response = await $fetch<BalanceResponse>('/api/getBalance', {
 		method: 'POST',
 		body: { address: address },

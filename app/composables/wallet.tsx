@@ -1,9 +1,10 @@
-import { ref, type Ref } from 'vue';
+import { ref } from 'vue';
 import {
   sendTxApi,
-  createWallet
+  createWallet,
+  fetchBalance
 } from '@/services/walletService';
-import type { TxBody, WalletMode } from '~/types';
+import type { EthAddress, TxBody, WalletMode } from '~/types';
 
 const wallet = ref<Awaited<ReturnType<typeof createWallet>> | null>(null);
 
@@ -28,4 +29,16 @@ export function useWallet() {
     }
   }
   return { txHash, sendTx };
+}
+
+export function useFetchBalance() {
+  const balance = ref<string>('');
+  async function fetch(address: EthAddress) {
+    try {
+      balance.value = await fetchBalance(address); 
+    } catch (err: any) {
+
+    }
+  }
+  return { balance, fetch }
 }

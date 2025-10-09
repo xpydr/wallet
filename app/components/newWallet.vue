@@ -22,18 +22,22 @@
 		<hr>
 		<p v-if="error" class="text-red-500">{{ error }}</p>
 		<div v-if="myWallet" class="mx-2">
-			<p v-if="myWallet">Address: {{ myWallet?.address }}</p>
-			<p v-if="myWallet">Balance: {{ myWallet?.balance }} ETH</p>
+			<p>Address: {{ myWallet?.address }}</p>
+			<br>
+			<div class="flex items-center gap-2">
+				<p>Balance: {{ myWallet?.balance }} ETH</p> 
+				<Icon @click="refreshBalance" class="text-cyan-300 hover:cursor-pointer" name="material-symbols:refresh-rounded" size="24" />
+			</div>
 			<br>
 			<p>Seed: {{ myWallet?.mnemonic }}</p>
 			<br>
 		</div>
 		<div v-if="myWallet" class="mx-2">
 			<div class="grid grid-cols-2 w-full items-center justify-center text-center">
-				<div class="flex flex-col gap-4 mx-8 mb-8">
-					<button @click="isDeposit = true" class="border p-4" active-class="bg-black"
+				<div class="flex flex-col items-center gap-4 mb-8">
+					<button @click="isDeposit = true" class="border p-4 w-48" active-class="bg-black"
 						:class="[isDeposit ? 'border-cyan-300' : '']">Deposit</button>
-					<button @click="isDeposit = false" class="border p-4"
+					<button @click="isDeposit = false" class="border p-4 w-48"
 						:class="[!isDeposit ? 'border-cyan-300' : '']">Withdraw</button>
 				</div>
 				<div>
@@ -48,7 +52,6 @@
 						<button @click="handleSend" class="border p-2">Send</button>
 					</div>
 				</div>
-
 				<p v-if="txHash && !isDeposit" class="flex gap-2">
 					Tx: <a v-if="txHash && !isDeposit" :href="`https://sepolia.etherscan.io/tx/${txHash}`"
 						target="_blank" rel="noopener noreferrer">{{ txHash }}</a>
@@ -61,18 +64,19 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import QrcodeVue from 'qrcode.vue';
-import type { WalletMode } from '~/types';
+import type { EthAddress, WalletMode } from '~/types';
 
 const walletModes = [12, 15, 18, 21, 24]
 
 const walletMode = ref<WalletMode>(12);
 const error = ref<any>(null);
 const { txHash, sendTx } = useWallet();
-const to = ref<string>('')
-const amountInEther = ref<string>('')
-const isDeposit = ref<boolean>(true)
-const isLoading = ref<boolean>(false)
-const lock = ref<boolean>(false)
+const { balance, fetch } = useFetchBalance();
+const to = ref<string>('');
+const amountInEther = ref<string>('');
+const isDeposit = ref<boolean>(true);
+const isLoading = ref<boolean>(false);
+const lock = ref<boolean>(false);
 
 interface Wallet {
 	address?: string;
@@ -97,16 +101,40 @@ async function generateWallet(): Promise<void> {
 async function handleSend() {
 	try {
 		isLoading.value = true
-		const res = await sendTx("0xaea0Bd7AF7E1f6BC5d2Caf508Ceb195040352A9b", "0.01");
-		console.log(res)
-		console.log(txHash.value)
+		await sendTx(to.value, amountInEther.value);
 	} catch (err: any) {
-		console.error(err)
 		error.value = err.message
 	} finally {
 		isLoading.value = false
 	}
 }
+
+async function refreshBalance() {
+  try {
+    isLoading.value = true;
+    const address = myWallet?.value?.address;
+    if (!isValidEthAddress(address)) {
+      throw new Error('Invalid or missing Ethereum address');
+    }
+    const res = await fetch(address);
+  } catch (err: any) {
+    console.error('Failed to fetch balance:', err.message);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+const isValidEthAddress = (address: string | null | undefined): address is EthAddress => {
+  return typeof address === 'string' && /^0x[a-fA-F0-9]{40}$/.test(address);
+};
+
+watch(to, (newValue) => {
+	if (newValue && !/^0x([a-fA-F0-9]{2})+$/.test(newValue)) {
+		error.value = 'Please enter a valid hexadecimal string'
+	} else {
+		error.value = ''
+	}
+})
 </script>
 
 <style scoped>
