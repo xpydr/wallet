@@ -93,7 +93,6 @@ const walletModes = [12, 15, 18, 21, 24]
 const walletMode = ref<WalletMode>(12);
 const error = ref<any>(null);
 const { txHash, sendTx } = useWallet();
-const { balance, fetch } = useFetchBalance();
 const to = ref<string>('');
 const amountInEther = ref<string>('');
 const isDeposit = ref<boolean>(true);
@@ -132,9 +131,10 @@ async function handleSend() {
 	}
 }
 
-async function refreshBalance() {
+async function refreshBalance() { // eth balance: manual refresh & update ui
 	try {
 		isLoading.value = true;
+		const { balance, fetch } = useFetchBalance(); 
 		if (!myWallet.value) {
 			throw new Error('Wallet is not initialized');
 		}
@@ -151,17 +151,17 @@ async function refreshBalance() {
 	}
 }
 
-const isValidEthAddress = (address: string | null | undefined): address is EthAddress => {
+const isValidEthAddress = (address: string | null | undefined): address is EthAddress => { // ts validation
 	return typeof address === 'string' && /^0x[a-fA-F0-9]{40}$/.test(address);
 };
 
-watch(to, (newValue) => {
+watch(to, (newValue) => { // withdraw to: input validation
 	if (newValue && !/^0x([a-fA-F0-9]{2})+$/.test(newValue)) {
 		error.value = 'Please enter a valid hexadecimal string'
 	} else {
 		error.value = ''
 	}
-})
+});
 </script>
 
 <style scoped>

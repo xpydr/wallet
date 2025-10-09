@@ -23,3 +23,11 @@ logs
 .env.*
 !.env.example
 
+# Solidity & Hardhat
+artifacts
+cache
+contracts
+ignition
+scripts
+test
+hardhat.config.ts
