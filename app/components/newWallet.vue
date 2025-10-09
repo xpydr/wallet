@@ -5,11 +5,11 @@
 				<input v-model="walletMode" type="radio" name="word-count" :value="mode" class="mx-2">{{ mode }}-word
 			</label>
 		</div>
-		<div class="mx-4 hover:cursor-pointer" @click="lock = !lock">
-			<Icon v-if="lock" name="zondicons:lock-closed" size="24" />
+		<div class="mx-4 hover:cursor-pointer" @click="isLock = !isLock">
+			<Icon v-if="isLock" name="zondicons:lock-closed" size="24" />
 			<Icon v-else name="bxs:lock-open" size="24" />
 		</div>
-		<button v-if="!lock" class="border border-black p-2 overflow-hidden min-w-fit border-cyan-300 text-cyan-300"
+		<button v-if="!isLock" class="border border-black p-2 overflow-hidden min-w-fit border-cyan-300 text-cyan-300"
 			@click="generateWallet">
 			Generate
 		</button>
@@ -23,18 +23,30 @@
 		<p v-if="error" class="text-red-500">{{ error }}</p>
 		<div v-if="myWallet" class="mx-2">
 			<div class="flex items-center gap-2">
-				<p>Address: {{ myWallet?.address }}</p>
+				<p>Address: {{ myWallet.address }}</p>
+
 				<a :href="`https://sepolia.etherscan.io/address/${myWallet?.address}`" target="_blank" rel="noopener noreferrer">
-					<Icon name="gridicons:external" class="text-cyan-300 hover:cursor-pointer" size="24" />
+					<Icon class="text-cyan-300 hover:cursor-pointer" name="gridicons:external" size="24" />
 				</a>
 			</div>
 			<br>
 			<div class="flex items-center gap-2">
-				<p>Balance: {{ myWallet?.balance }} ETH</p> 
-				<Icon @click="refreshBalance" class="text-cyan-300 hover:cursor-pointer" name="material-symbols:refresh-rounded" size="24" />
+				<!-- add network selection & dynamically change etherscan hrefs -->
+				<p>Network: {{  }}</p>
 			</div>
 			<br>
-			<p>Seed: {{ myWallet?.mnemonic }}</p>
+			<div class="flex items-center gap-2">
+				<p>Balance: {{ myWallet.balance }} ETH</p> 
+				<Icon @click="refreshBalance" class="text-cyan-300 hover:cursor-pointer" name="material-symbols:refresh-rounded" size="24" />
+			</div>
+			
+			<br>
+			<!-- add eye icon hide and view -->
+			<div class="flex items-center gap-2">
+				<p>Seed: <span v-show="!isHideMnemonic">{{ myWallet.mnemonic }}</span></p> 
+				<Icon v-if="isHideMnemonic" @click="isHideMnemonic = !isHideMnemonic" class="text-cyan-300 hover:cursor-pointer" name="bx:hide" size="24" />
+				<Icon v-else @click="isHideMnemonic = !isHideMnemonic" class="text-cyan-300 hover:cursor-pointer" name="bx:show" size="24" />
+			</div>
 			<br>
 		</div>
 		<div v-if="myWallet" class="mx-2">
@@ -81,7 +93,8 @@ const to = ref<string>('');
 const amountInEther = ref<string>('');
 const isDeposit = ref<boolean>(true);
 const isLoading = ref<boolean>(false);
-const lock = ref<boolean>(false);
+const isLock = ref<boolean>(false);
+const isHideMnemonic = ref<boolean>(true);
 
 interface Wallet {
 	address?: string;
