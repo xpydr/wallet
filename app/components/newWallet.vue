@@ -22,7 +22,12 @@
 		<hr>
 		<p v-if="error" class="text-red-500">{{ error }}</p>
 		<div v-if="myWallet" class="mx-2">
-			<p>Address: {{ myWallet?.address }}</p>
+			<div class="flex items-center gap-2">
+				<p>Address: {{ myWallet?.address }}</p>
+				<a :href="`https://sepolia.etherscan.io/address/${myWallet?.address}`" target="_blank" rel="noopener noreferrer">
+					<Icon name="gridicons:external" class="text-cyan-300 hover:cursor-pointer" size="24" />
+				</a>
+			</div>
 			<br>
 			<div class="flex items-center gap-2">
 				<p>Balance: {{ myWallet?.balance }} ETH</p> 
