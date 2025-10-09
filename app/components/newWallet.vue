@@ -25,27 +25,32 @@
 			<div class="flex items-center gap-2">
 				<p>Address: {{ myWallet.address }}</p>
 
-				<a :href="`https://sepolia.etherscan.io/address/${myWallet?.address}`" target="_blank" rel="noopener noreferrer">
+				<a :href="`https://sepolia.etherscan.io/address/${myWallet?.address}`" target="_blank"
+					rel="noopener noreferrer">
 					<Icon class="text-cyan-300 hover:cursor-pointer" name="gridicons:external" size="24" />
 				</a>
 			</div>
 			<br>
 			<div class="flex items-center gap-2">
-				<!-- add network selection & dynamically change etherscan hrefs -->
-				<p>Network: {{  }}</p>
+				<p>Network:</p>
+				<select name="networkSelect" id="networkSelect">
+					<option value="sepolia" selected>Sepolia</option>
+				</select>
 			</div>
 			<br>
 			<div class="flex items-center gap-2">
-				<p>Balance: {{ myWallet.balance }} ETH</p> 
-				<Icon @click="refreshBalance" class="text-cyan-300 hover:cursor-pointer" name="material-symbols:refresh-rounded" size="24" />
+				<p>Balance: {{ myWallet.balance }} ETH</p>
+				<Icon @click="refreshBalance" class="text-cyan-300 hover:cursor-pointer"
+					name="material-symbols:refresh-rounded" size="24" />
 			</div>
-			
+
 			<br>
-			<!-- add eye icon hide and view -->
 			<div class="flex items-center gap-2">
-				<p>Seed: <span v-show="!isHideMnemonic">{{ myWallet.mnemonic }}</span></p> 
-				<Icon v-if="isHideMnemonic" @click="isHideMnemonic = !isHideMnemonic" class="text-cyan-300 hover:cursor-pointer" name="bx:hide" size="24" />
-				<Icon v-else @click="isHideMnemonic = !isHideMnemonic" class="text-cyan-300 hover:cursor-pointer" name="bx:show" size="24" />
+				<p>Seed: <span v-show="!isHideMnemonic">{{ myWallet.mnemonic }}</span></p>
+				<Icon v-if="isHideMnemonic" @click="isHideMnemonic = !isHideMnemonic"
+					class="text-cyan-300 hover:cursor-pointer" name="bx:hide" size="24" />
+				<Icon v-else @click="isHideMnemonic = !isHideMnemonic" class="text-cyan-300 hover:cursor-pointer"
+					name="bx:show" size="24" />
 			</div>
 			<br>
 		</div>
@@ -128,22 +133,26 @@ async function handleSend() {
 }
 
 async function refreshBalance() {
-  try {
-    isLoading.value = true;
-    const address = myWallet?.value?.address;
-    if (!isValidEthAddress(address)) {
-      throw new Error('Invalid or missing Ethereum address');
-    }
-    const res = await fetch(address);
-  } catch (err: any) {
-    console.error('Failed to fetch balance:', err.message);
-  } finally {
-    isLoading.value = false;
-  }
+	try {
+		isLoading.value = true;
+		if (!myWallet.value) {
+			throw new Error('Wallet is not initialized');
+		}
+		const address = myWallet.value.address;
+		if (!isValidEthAddress(address)) {
+			throw new Error('Invalid or missing Ethereum address');
+		}
+		await fetch(address);
+		myWallet.value.balance = balance.value;
+	} catch (err: any) {
+		console.error('Failed to fetch balance:', err.message);
+	} finally {
+		isLoading.value = false;
+	}
 }
 
 const isValidEthAddress = (address: string | null | undefined): address is EthAddress => {
-  return typeof address === 'string' && /^0x[a-fA-F0-9]{40}$/.test(address);
+	return typeof address === 'string' && /^0x[a-fA-F0-9]{40}$/.test(address);
 };
 
 watch(to, (newValue) => {
