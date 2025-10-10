@@ -1,9 +1,11 @@
 import { ethers } from 'ethers';
+import { useWalletStore } from '~/stores/wallet';
 import type { TxBody } from '~/types';
 
 export default defineEventHandler(async (event) => {
+    const walletStore = useWalletStore();
     const apiKey = process.env.API_KEY
-    const seed: string | undefined = process.env.SEED_PHRASE
+    const seed: string | undefined = walletStore.mnemonic
     if (!apiKey) throw createError({ statusCode: 500, message: 'API key missing' });
     if (!seed) throw new Error('Missing SEED_PHRASE');
 

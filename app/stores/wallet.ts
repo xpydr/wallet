@@ -1,12 +1,14 @@
 import { defineStore } from 'pinia';
+import { ref } from 'vue';
 import { ethers } from 'ethers';
+import { fetchBalance } from '~/services/walletService';
 import type { WalletMode } from '~/types';
 
 export const useWalletStore = defineStore('walletStore', {
     state: () => ({
-        address: '',
-        mnemonic: '',
-        balance: '',
+        address: ref<string>(''),
+        mnemonic: ref<string>(''),
+        balance: ref<string>(''),
     }),
     actions: {
         async createWallet(wordCount: WalletMode): Promise<{ success: boolean }> {
@@ -31,7 +33,7 @@ export const useWalletStore = defineStore('walletStore', {
 
                 this.address = wallet.address;
                 this.mnemonic = mnemonic.phrase;
-                this.balance = await fetchBalance(wallet.address); 
+                this.balance = await fetchBalance(wallet.address);
 
                 return { success: true };
             } catch (error) {
@@ -39,11 +41,14 @@ export const useWalletStore = defineStore('walletStore', {
                 return { success: false };
             }
         },
+        async getBalance(address: string): Promise<{ success: boolean }> {
+            try {
+                this.balance = await fetchBalance(address);
+                return { success: true }
+            } catch (err: any) {
+                console.error(err);
+                return { success: false }
+            }
+        }
     },
 });
-
-// Example fetchBalance (define or import this)
-async function fetchBalance(address: string): Promise<string> {
-    // Implement balance fetching logic (e.g., via provider)
-    return '0';
-}

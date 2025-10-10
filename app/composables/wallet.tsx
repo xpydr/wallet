@@ -1,15 +1,18 @@
 import { ref } from 'vue';
-import { sendTxApi, fetchBalance } from '@/services/walletService';
+import { sendTxApi, fetchBalance } from '~/services/walletService';
+import { useWalletStore } from '~/stores/wallet';
 import type { TxBody, WalletMode } from '~/types';
 
-const walletStore = useWalletStore(); // rename to wallet after renaming other wallet
-const wallet = ref<Awaited<ReturnType<typeof createWallet>> | null>(null);
-
 export async function useCreate(walletMode: WalletMode) {
-    async function generate() {
-        wallet.value = await createWallet(walletMode);
-    }
-    return { wallet, generate };
+    const walletStore = useWalletStore(); // rename to wallet after renaming other wallet
+    return { 
+        createWallet: async () => {
+            await walletStore.createWallet(walletMode);
+        },
+        address: computed(() => walletStore.address),
+        balance: computed(() => walletStore.balance),
+        mnemonic: computed(() => walletStore.mnemonic)
+    };
 }
 
 export function useWallet() {
@@ -22,20 +25,8 @@ export function useWallet() {
                 txHash.value = res.hash;
             }
         } catch (err: any) {
-            console.error(err)
+            console.error(err);
         }
     }
     return { txHash, sendTx };
-}
-
-export function useFetchBalance() {
-    const balance = ref<string>('');
-    async function fetch(address: string) {
-        try {
-            balance.value = await fetchBalance(address);
-        } catch (err: any) {
-
-        }
-    }
-    return { balance, fetch }
 }

@@ -1,8 +1,4 @@
 <template>
-    <div>
-        <!-- test -->
-
-    </div>
     <div class="flex items-center pb-2">
         <div class="flex flex-row flex-1 gap-4">
             <label v-for="mode in walletModes"> <!-- select mnemonic word count -->
@@ -25,10 +21,10 @@
     <div class="flex flex-col gap-4">
         <hr>
         <p v-if="error" class="text-red-500">{{ error }}</p>
-        <div v-if="myWallet" class="mx-2">
+        <div class="mx-2">
             <div class="flex items-center gap-2">
-                <p>Address: {{ myWallet.address }}</p>
-                <a :href="`https://sepolia.etherscan.io/address/${myWallet?.address}`" target="_blank"
+                <p>Address: {{ address }}</p>
+                <a :href="`https://sepolia.etherscan.io/address/${address}`" target="_blank"
                     rel="noopener noreferrer">
                     <Icon class="text-cyan-300 hover:cursor-pointer" name="gridicons:external" size="24" />
                 </a>
@@ -42,13 +38,13 @@
             </div>
             <br>
             <div class="flex items-center gap-2">
-                <p>Balance: {{ myWallet.balance }} ETH</p>
+                <p>Balance: {{ balance }} ETH</p>
                 <Icon @click="refreshBalance" class="text-cyan-300 hover:cursor-pointer"
                     name="material-symbols:refresh-rounded" size="24" />
             </div>
             <br>
             <div class="flex items-center gap-2">
-                <p>Seed: <span v-show="!isHideMnemonic">{{ myWallet.mnemonic }}</span></p>
+                <p>Seed: <span v-show="!isHideMnemonic">{{ mnemonic }}</span></p>
                 <Icon v-if="isHideMnemonic" @click="isHideMnemonic = !isHideMnemonic"
                     class="text-cyan-300 hover:cursor-pointer" name="bx:hide" size="24" />
                 <Icon v-else @click="isHideMnemonic = !isHideMnemonic" class="text-cyan-300 hover:cursor-pointer"
@@ -56,7 +52,7 @@
             </div>
             <br>
         </div>
-        <div v-if="myWallet" class="mx-2">
+        <div v-if="walletStore" class="mx-2">
             <div class="grid grid-cols-2 w-full items-center justify-center text-center">
                 <div class="flex flex-col items-center gap-4 mb-8">
                     <button @click="isDeposit = true" class="border p-4 w-48" active-class="bg-black"
@@ -66,7 +62,7 @@
                 </div>
                 <div>
                     <div v-show="isDeposit" class="flex justify-center">
-                        <qrcode-vue :value="myWallet?.address" :size="150" foreground="black" background="white"
+                        <qrcode-vue :value="address" :size="150" foreground="black" background="white"
                             level="H" render-as="svg" />
                     </div>
                     <div v-show="!isDeposit && !isLoading" class="flex gap-2 flex-col text-left m-4">
@@ -89,7 +85,10 @@
 import { ref } from 'vue';
 import QrcodeVue from 'qrcode.vue';
 import type { WalletMode } from '~/types';
+import { useWalletStore } from '~/stores/wallet';
 
+const walletStore = useWalletStore();
+await walletStore.createWallet(12);
 const walletModes = [12, 15, 18, 21, 24]
 
 const walletMode = ref<WalletMode>(12);
@@ -105,22 +104,17 @@ const isHideMnemonic = ref<boolean>(true);
 interface Wallet {
     address?: string;
     balance?: string;
-    wordCount?: number;
     mnemonic?: string;
 }
 
-const myWallet = ref<Wallet | null>(null);
+const { createWallet, address, balance, mnemonic } = await useCreate(walletMode.value);
 
-const walletStore = useWalletStore();
 
 async function generateWallet(): Promise<void> {
     try {
 
-        const res = await walletStore.createWallet(walletMode.value);
-        console.log(res)
-        const { wallet, generate } = await useCreate(walletMode.value)
-        myWallet.value = wallet.value;
-        await generate();
+        console.log(address, balance, mnemonic);
+        createWallet()
     } catch (err: any) {
         console.error(err.message)
         error.value = err.message;
@@ -138,19 +132,16 @@ async function handleSend() {
     }
 }
 
-async function refreshBalance() { // eth balance: manual refresh & update ui
+async function refreshBalance(walletMode: WalletMode) { // eth balance: manual refresh & update ui
     try {
         isLoading.value = true;
-        const { balance, fetch } = useFetchBalance();
-        if (!myWallet.value) {
+        if (!walletStore) {
             throw new Error('Wallet is not initialized');
         }
-        const address = myWallet.value.address;
-        if (!isValidEthAddress(address)) {
+        if (!isValidEthAddress(walletStore.address)) {
             throw new Error('Invalid or missing Ethereum address');
         }
-        await fetch(address);
-        myWallet.value.balance = balance.value;
+        walletStore.createWallet(walletMode)
     } catch (err: any) {
         console.error('Failed to fetch balance:', err.message);
     } finally {
