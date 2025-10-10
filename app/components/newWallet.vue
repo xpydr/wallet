@@ -21,7 +21,7 @@
     <div class="flex flex-col gap-4">
         <hr>
         <p v-if="error" class="text-red-500">{{ error }}</p>
-        <div class="mx-2">
+        <div v-if="walletStore.address" class="mx-2">
             <div class="flex items-center gap-2">
                 <p>Address: {{ address }}</p>
                 <a :href="`https://sepolia.etherscan.io/address/${address}`" target="_blank"
@@ -52,7 +52,7 @@
             </div>
             <br>
         </div>
-        <div v-if="walletStore" class="mx-2">
+        <div v-if="walletStore.address" class="mx-2">
             <div class="grid grid-cols-2 w-full items-center justify-center text-center">
                 <div class="flex flex-col items-center gap-4 mb-8">
                     <button @click="isDeposit = true" class="border p-4 w-48" active-class="bg-black"
@@ -88,7 +88,6 @@ import type { WalletMode } from '~/types';
 import { useWalletStore } from '~/stores/wallet';
 
 const walletStore = useWalletStore();
-await walletStore.createWallet(12);
 const walletModes = [12, 15, 18, 21, 24]
 
 const walletMode = ref<WalletMode>(12);
@@ -107,14 +106,12 @@ interface Wallet {
     mnemonic?: string;
 }
 
-const { createWallet, address, balance, mnemonic } = await useCreate(walletMode.value);
-
+const { createWallet, address, balance, mnemonic } = await useCreate();
 
 async function generateWallet(): Promise<void> {
     try {
-
-        console.log(address, balance, mnemonic);
-        createWallet()
+        console.log(address.value, balance.value, mnemonic.value);
+        createWallet(walletMode.value)
     } catch (err: any) {
         console.error(err.message)
         error.value = err.message;
@@ -132,16 +129,16 @@ async function handleSend() {
     }
 }
 
-async function refreshBalance(walletMode: WalletMode) { // eth balance: manual refresh & update ui
+async function refreshBalance() { // eth balance: manual refresh & update ui
     try {
         isLoading.value = true;
         if (!walletStore) {
             throw new Error('Wallet is not initialized');
         }
-        if (!isValidEthAddress(walletStore.address)) {
+        if (!isValidEthAddress(address.value)) {
             throw new Error('Invalid or missing Ethereum address');
         }
-        walletStore.createWallet(walletMode)
+        await walletStore.getBalance(address.value);
     } catch (err: any) {
         console.error('Failed to fetch balance:', err.message);
     } finally {

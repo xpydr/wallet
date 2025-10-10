@@ -3,10 +3,10 @@ import { sendTxApi, fetchBalance } from '~/services/walletService';
 import { useWalletStore } from '~/stores/wallet';
 import type { TxBody, WalletMode } from '~/types';
 
-export async function useCreate(walletMode: WalletMode) {
+export async function useCreate() {
     const walletStore = useWalletStore(); // rename to wallet after renaming other wallet
     return { 
-        createWallet: async () => {
+        createWallet: async (walletMode: WalletMode) => {
             await walletStore.createWallet(walletMode);
         },
         address: computed(() => walletStore.address),

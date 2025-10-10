@@ -9,6 +9,7 @@ export const useWalletStore = defineStore('walletStore', {
         address: ref<string>(''),
         mnemonic: ref<string>(''),
         balance: ref<string>(''),
+        keystore: ref<string>('')
     }),
     actions: {
         async createWallet(wordCount: WalletMode): Promise<{ success: boolean }> {
@@ -35,20 +36,42 @@ export const useWalletStore = defineStore('walletStore', {
                 this.mnemonic = mnemonic.phrase;
                 this.balance = await fetchBalance(wallet.address);
 
+                const password = ''; // user set password
+                const jsonKeystore = await wallet.encrypt(password);
+                this.keystore = jsonKeystore;
+                localStorage.setItem('walletKeystore', jsonKeystore);
+
                 return { success: true };
             } catch (error) {
                 console.error('Error creating wallet:', error);
                 return { success: false };
             }
         },
-        async getBalance(address: string): Promise<{ success: boolean }> {
+        async recoverWallet(password: string): Promise<{ success: boolean }> {
             try {
-                this.balance = await fetchBalance(address);
-                return { success: true }
-            } catch (err: any) {
-                console.error(err);
-                return { success: false }
+                const jsonKeystore = this.keystore || localStorage.getItem('walletKeystore');
+                if (!jsonKeystore) throw new Error('No keystore found');
+                
+                const wallet = await ethers.Wallet.fromEncryptedJson(jsonKeystore, password);
+
+                this.address = wallet.address;
+                this.mnemonic = wallet.mnemonic!.phrase;
+                this.balance = await fetchBalance(wallet.address);
+
+                return { success: true };
+            } catch (error) {
+                console.error('Error recovering wallet:', error);
+                return { success: false };
             }
-        }
+        },
     },
+    async getBalance(address: string): Promise<{ success: boolean }> {
+        try {
+            this.balance = await fetchBalance(address);
+            return { success: true }
+        } catch (err: any) {
+            console.error(err);
+            return { success: false }
+        }
+    }
 });
