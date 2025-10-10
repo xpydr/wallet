@@ -7,5 +7,3 @@ export type TxBody = {
   gasLimit?: string;
   gasPrice?: string;
 }
-
-export type EthAddress = `0x${string}`;

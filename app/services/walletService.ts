@@ -1,7 +1,6 @@
 import { ethers, HDNodeWallet } from 'ethers'
 import type { TxBody, WalletMode, EthAddress } from '~/types';
 
-
 export async function sendTxApi(payload: TxBody) {
 	try {
 		return await $fetch<{ hash: string }>('/api/sendTx', {
@@ -38,6 +37,7 @@ export async function createWallet(wordCount: WalletMode): Promise<{
 		const entropy = ethers.randomBytes(entropyBytes);
 		const mnemonic = ethers.Mnemonic.fromEntropy(entropy);
 		const wallet = ethers.Wallet.fromPhrase(mnemonic.phrase);
+		// const wallet = useState('wallet', () => ethers.Wallet.fromPhrase(mnemonic.phrase));
 
 		let balance: string = await fetchBalance(wallet.address)
 
@@ -61,12 +61,12 @@ export async function createWallet(wordCount: WalletMode): Promise<{
 interface BalanceResponse {
 	balance: string
 }
-export async function fetchBalance(address: EthAddress): Promise<string> {
+export async function fetchBalance(address: string): Promise<string> {
 	const response = await $fetch<BalanceResponse>('/api/getBalance', {
 		method: 'POST',
 		body: { address: address },
 	});
-	return response.balance
+	return response.balance;
 }
 
 // export async function loadWallet(
