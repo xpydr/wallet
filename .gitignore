@@ -29,5 +29,5 @@ cache
 contracts
 ignition
 scripts
-test
+tests
 hardhat.config.ts
