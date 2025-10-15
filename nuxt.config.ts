@@ -1,11 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
-  modules: ['@nuxt/icon', '@nuxtjs/tailwindcss', '@pinia/nuxt'],
-  runtimeConfig: {
-    public: {
-      alchemyApiKey: process.env.API_KEY,
+    compatibilityDate: '2025-07-15',
+    devtools: { enabled: true },
+    modules: ['@nuxt/icon', '@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxtjs/color-mode'],
+    runtimeConfig: {
+        public: {
+            rpcUrl: `https://eth-sepolia.g.alchemy.com/v2/${process.env.API_KEY}`,
+        },
     },
-  },
-})
+});

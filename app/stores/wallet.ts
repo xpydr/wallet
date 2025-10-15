@@ -1,10 +1,11 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { ethers } from 'ethers';
-import { fetchBalance } from '~/services/walletService';
+import { fetchBalance, sendTxApi } from '~/services/walletService';
 import type { WalletMode } from '~/types';
 
 interface WalletState {
+    isAuth: Ref<boolean>;
     address: Ref<string>;
     mnemonic: Ref<string>;
     balance: Ref<string>;
@@ -16,7 +17,8 @@ interface WalletActions {
     recoverWallet(password: string): Promise<{ success: boolean }>;
     getBalance(address: string): Promise<{ balance: string }>;
     initUser(password: string): Promise<{ success: boolean }>;
-    clearPassword(): void;
+    sendTx(to: string, value: string): Promise<any>;
+    clearSession(): void;
 }
 
 export const useWalletStore = defineStore<
@@ -27,6 +29,7 @@ export const useWalletStore = defineStore<
     WalletActions
 >('walletStore', {
     state: (): WalletState => ({
+        isAuth: ref(false),
         address: ref(''),
         mnemonic: ref(''),
         balance: ref(''),
@@ -39,13 +42,16 @@ export const useWalletStore = defineStore<
                 this.password = password
                 this.keystore = localStorage.getItem('walletKeystore') || null
                 if (!this.keystore) {
-                    await this.createWallet(12, password)
+                    const res = await this.createWallet(12, password);
+                    (res.success == false) ? this.isAuth = false : this.isAuth = true;
+                    return { success: res.success }
                 } else {
-                    await this.recoverWallet(password)
+                    const res = await this.recoverWallet(password);
+                    (res.success == false) ? this.isAuth = false : this.isAuth = true;
+                    return { success: res.success }
                 }
-                return { success: true }
             } catch (err: any) {
-                console.error(err)
+                console.error(err.message);
             }
             return { success: false };
         },
@@ -80,24 +86,23 @@ export const useWalletStore = defineStore<
 
                 return { success: true };
             } catch (error) {
-                console.error('Error creating wallet:', error);
                 return { success: false };
             }
         },
         async recoverWallet(password: string): Promise<{ success: boolean }> {
             try {
-                const jsonKeystore = this.keystore || localStorage.getItem('walletKeystore');
+                const jsonKeystore = localStorage.getItem('walletKeystore');
                 if (!jsonKeystore) throw new Error('No keystore found');
 
                 const wallet = await ethers.Wallet.fromEncryptedJson(jsonKeystore, password);
 
+                this.keystore = jsonKeystore;
                 this.address = wallet.address;
                 this.mnemonic = wallet.mnemonic!.phrase;
                 this.balance = await fetchBalance(wallet.address);
 
                 return { success: true };
             } catch (error) {
-                console.error('Error recovering wallet:', error);
                 return { success: false };
             }
         },
@@ -105,15 +110,42 @@ export const useWalletStore = defineStore<
             try {
                 address ? null : address = this.address;
                 const bal: string = await fetchBalance(address);
-                if (!address) this.balance = bal;
+                this.balance = bal;
+                console.log(bal);
                 return { balance: bal };
             } catch (err: any) {
-                console.error(err);
                 return { balance: 'error' };
             }
         },
-        clearPassword() {
+        async sendTx(to: string, value: string): Promise<any> {
+            try {
+                if (!this.keystore || typeof this.password !== 'string') throw new Error('Failed to authenticate');
+
+                const txRequest: ethers.TransactionRequest = {
+                    to: to,
+                    value: ethers.parseEther(value)
+                };
+
+                const wallet: ethers.Wallet | ethers.HDNodeWallet = await ethers.Wallet.fromEncryptedJson(this.keystore, this.password);
+
+                const config = useRuntimeConfig();
+                const provider = new ethers.JsonRpcProvider(config.public.rpcUrl);
+                const signer = wallet.connect(provider);
+
+                const txPopulated: ethers.TransactionRequest = await signer.populateTransaction(txRequest);
+                const txSigned: string = await wallet.signTransaction(txPopulated);
+                const res = await sendTxApi({ txSigned: txSigned });
+                if (res) return { hash: res.hash };
+                else throw new Error('Failed to broadcast transaction');
+            } catch (err: any) {
+                throw createError({ statusCode: 500, statusMessage: err.message });
+            }
+        },
+        clearSession() {
+            localStorage.removeItem('walletKeystore');
             this.password = '';
+            this.keystore = null;
+            this.isAuth = false;
         },
     },
 });

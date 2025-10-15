@@ -1,6 +1,4 @@
-import type { TxBody } from '~/types';
-
-export async function sendTxApi(payload: TxBody) {
+export async function sendTxApi(payload: { txSigned: string }) {
     try {
         return await $fetch<{ hash: string }>('/api/sendTx', {
             method: 'POST',
@@ -18,19 +16,3 @@ export async function fetchBalance(address: string): Promise<string> {
     });
     return response.balance;
 }
-
-// export async function loadWallet(
-//   encryptedJson: string,
-//   password: string
-// ): Promise<string> {
-//   if (!provider) throw new Error("Provider not initialized");
-//   wallet.value = await ethers.Wallet.fromEncryptedJson(encryptedJson, password);
-//   signer = wallet.connect(provider);
-//   return wallet.address;
-// }
-
-// export async function exportWallet(password: string): Promise<string> {
-//   if (!wallet) throw new Error("No wallet loaded");
-//   return await wallet.encrypt(password);
-// }
-

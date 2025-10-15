@@ -1,5 +1,5 @@
 <template>
-    <div class="flex items-center pb-2">
+    <div class="flex items-center pb-2 dark:bg-black dark:text-white transition">
         <div class="flex flex-row flex-1 gap-4">
             <label v-for="mode in walletModes"> <!-- select mnemonic word count -->
                 <input v-model="walletMode" type="radio" name="word-count" :value="mode" class="mx-2">{{ mode }}-word
@@ -14,7 +14,7 @@
             Generate
         </button>
         <div v-else title="Locked"
-            class="border border-black p-2 overflow-hidden min-w-fit border-cyan-300 text-cyan-300 bg-black hover:cursor-not-allowed">
+            class="border border-black p-2 overflow-hidden min-w-fit border-cyan-300 text-cyan-300 hover:cursor-not-allowed bg-cyan-900">
             Generate
         </div>
     </div>
@@ -24,21 +24,20 @@
         <div v-if="walletStore.address" class="mx-2">
             <div class="flex items-center gap-2">
                 <p>Address: {{ address }}</p>
-                <a :href="`https://sepolia.etherscan.io/address/${address}`" target="_blank"
-                    rel="noopener noreferrer">
+                <a :href="`https://sepolia.etherscan.io/address/${address}`" target="_blank" rel="noopener noreferrer">
                     <Icon class="text-cyan-300 hover:cursor-pointer" name="gridicons:external" size="24" />
                 </a>
             </div>
             <br>
             <div class="flex items-center gap-2">
                 <p>Network:</p>
-                <select name="networkSelect" id="networkSelect">
+                <select name="networkSelect" id="networkSelect" class="dark:bg-black dark:text-white hover:cursor-pointer transition">
                     <option value="sepolia" selected>Sepolia</option>
                 </select>
             </div>
             <br>
             <div class="flex items-center gap-2">
-                <p>Balance: {{ balance }} ETH</p>
+                <p>Balance: {{ walletStore.balance }} ETH</p>
                 <Icon @click="refreshBalance" class="text-cyan-300 hover:cursor-pointer"
                     name="material-symbols:refresh-rounded" size="24" />
             </div>
@@ -62,12 +61,15 @@
                 </div>
                 <div>
                     <div v-show="isDeposit" class="flex justify-center">
-                        <qrcode-vue :value="address" :size="150" foreground="black" background="white"
-                            level="H" render-as="svg" />
+                        <div class="dark:border-cyan-300 transition">
+                            <qrcode-vue :value="address" :size="qrSize" foreground="black" :background="qrBg" level="H"
+                            render-as="svg" />
+                        </div>
+                        
                     </div>
                     <div v-show="!isDeposit && !isLoading" class="flex gap-2 flex-col text-left m-4">
                         <label class="flex gap-2">To: <input v-model="to" placeholder="0x..." class="w-full" /></label>
-                        <label class="flex gap-2">Amount: <input v-model="amountInEther" type="number" placeholder="ETH"
+                        <label class="flex gap-2">Amount: <input v-model="amountInEther" placeholder="ETH"
                                 class="w-full" /></label>
                         <button @click="handleSend" class="border p-2">Send</button>
                     </div>
@@ -83,60 +85,60 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import QrcodeVue from 'qrcode.vue';
 import type { WalletMode } from '~/types';
 import { useWalletStore } from '~/stores/wallet';
+import QrcodeVue from 'qrcode.vue';
+
+const qrSize = ref<number>(200);
+const qrBg = ref<string>('cyan');
 
 const walletStore = useWalletStore();
-const walletModes = [12, 15, 18, 21, 24]
+const walletModes = [12, 15, 18, 21, 24] // select word count
+const walletMode = ref<WalletMode>(12); // default 12
 
-const walletMode = ref<WalletMode>(12);
 const error = ref<any>(null);
 const { txHash, sendTx } = useWallet();
 const to = ref<string>('');
 const amountInEther = ref<string>('');
-const isDeposit = ref<boolean>(true);
-const isLoading = ref<boolean>(false);
-const isLock = ref<boolean>(false);
-const isHideMnemonic = ref<boolean>(true);
 
-interface Wallet {
-    address?: string;
-    balance?: string;
-    mnemonic?: string;
-}
+const isDeposit = ref<boolean>(true); // shows deposit qr OR withdrawal ui
+const isLoading = ref<boolean>(false); // hides withdrawal ui during tx
+const isLock = ref<boolean>(false); // disables generate button
+const isHideMnemonic = ref<boolean>(true); 
 
-const { createWallet, address, balance, mnemonic } = await useCreate();
+const { createWallet, address, mnemonic } = await useCreate();
 
 async function generateWallet(): Promise<void> {
+    isLoading.value = true;
     try {
-        console.log(address.value, balance.value, mnemonic.value);
-        createWallet(walletMode.value)
+        await createWallet(walletMode.value)
     } catch (err: any) {
-        console.error(err.message)
         error.value = err.message;
+    } finally {
+        isLoading.value = false;
     }
 }
 
-async function handleSend() {
+async function handleSend(): Promise<void> {
+    isLoading.value = true;
     try {
-        isLoading.value = true
-        await sendTx(to.value, amountInEther.value);
+        if (!to.value || !amountInEther.value) {
+            throw new Error('Missing fields');
+        }
+        const res = sendTx(to.value, amountInEther.value);
+        console.log(res);
     } catch (err: any) {
-        error.value = err.message
+        error.value = err.message;
     } finally {
         isLoading.value = false
     }
 }
 
-async function refreshBalance() { // eth balance: manual refresh & update ui
+async function refreshBalance(): Promise<void> { // eth balance: manual refresh & update ui
+    isLoading.value = true;
     try {
-        isLoading.value = true;
         if (!walletStore) {
             throw new Error('Wallet is not initialized');
-        }
-        if (!isValidEthAddress(address.value)) {
-            throw new Error('Invalid or missing Ethereum address');
         }
         await walletStore.getBalance(address.value);
     } catch (err: any) {
@@ -146,11 +148,7 @@ async function refreshBalance() { // eth balance: manual refresh & update ui
     }
 }
 
-const isValidEthAddress = (address: string | null | undefined) => { // ts validation
-    return typeof address === 'string' && /^0x[a-fA-F0-9]{40}$/.test(address);
-};
-
-watch(to, (newValue) => { // withdraw to: input validation
+watch(to, (newValue) => { // recipient input validation
     if (newValue && !/^0x([a-fA-F0-9]{2})+$/.test(newValue)) {
         error.value = 'Please enter a valid hexadecimal string'
     } else {
