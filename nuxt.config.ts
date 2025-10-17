@@ -2,6 +2,9 @@
 export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
     devtools: { enabled: true },
+    nitro: {
+        preset: 'node-server'
+    },
     modules: ['@nuxt/icon', '@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxtjs/color-mode'],
     runtimeConfig: {
         public: {
