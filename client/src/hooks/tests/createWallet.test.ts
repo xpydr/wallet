@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createWallet } from "../createWallet";
+import { createWallet } from "@/hooks/createWallet";
 import { ethers } from "ethers";
 
 vi.mock("ethers", async () => {
