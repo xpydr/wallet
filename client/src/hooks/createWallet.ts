@@ -1,6 +1,7 @@
 
 import { ethers } from "ethers";
-import { type WalletMode, type Wallet } from "../types";
+import { type WalletMode, type Wallet } from "@/types";
+import toast from "react-hot-toast";
 
 export async function createWallet(wordCount: WalletMode = 12, password: string): Promise<Wallet> {
   try {
@@ -27,11 +28,12 @@ export async function createWallet(wordCount: WalletMode = 12, password: string)
 
     const newWallet: Wallet = {
       address: wallet.address,
-      balance: 0, // init as 0 to save resources - odds of generating a used wallet is practically impossible (as of 11/11/25)
+      balance: 0, // init as 0 to save resources - odds of generating a used wallet are practically zero
       mnemonic: mnemonic.phrase
     }
     return newWallet;
   } catch (err) {
+    toast.error("Failed to create wallet");
     console.error(err);
     return null;
   }
