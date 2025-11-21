@@ -22,8 +22,8 @@ export default async function sendTx(to: string, value: string, mnemonic: string
       chainId: 11155111n, // Sepolia testnet
       data: "0x",
       type: 2, // EIP-1559
-      maxPriorityFeePerGas: ethers.parseUnits(maxPriorityFeePerGas, "gwei"), 
-      maxFeePerGas: ethers.parseUnits(maxFeePerGas, "gwei"),
+      maxPriorityFeePerGas: ethers.parseUnits(maxPriorityFeePerGas, "wei"), 
+      maxFeePerGas: ethers.parseUnits(maxFeePerGas, "wei"),
     };
 
     const txSigned = await myWallet.signTransaction(tx);
