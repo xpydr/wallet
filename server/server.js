@@ -93,7 +93,7 @@ app.post('api/v1/get-tx-data',
 
     } catch (err) {
       console.log(err);
-      res.status(500).json({ message: err.message, error: err });
+      res.status(500).json({ message: err.message, error: err, nonce: null, feeData: null });
     }
   }
 );
