@@ -11,7 +11,9 @@ export async function recoverWallet(password: string): Promise<Wallet> {
     const wallet = await ethers.Wallet.fromEncryptedJson(jsonKeystore, password);
 
     const myBalance = parseFloat(await getBalance(wallet.address));
-    const myMnemonic = wallet.mnemonic!.phrase;
+    
+    // Wallet can be either Wallet or HDNodeWallet; only HDNodeWallet has mnemonic, which is always the expected type here
+    const myMnemonic = "mnemonic" in wallet && wallet.mnemonic ? wallet.mnemonic.phrase : "";
 
     const myWallet: Wallet = {
       address: wallet.address,
