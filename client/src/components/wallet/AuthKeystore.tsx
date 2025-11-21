@@ -8,7 +8,7 @@ function AuthKeystore() {
   const { login, logout } = useAuth();
   const [password, setPassword] = useState('');
 
-  const [isKeystoreExist, setIsKeystoreExist] = useState(!!localStorage.getItem("walletKeystore")); // Clear last session / Remove saved keystore from localStorage
+  const isKeystoreExist = !!localStorage.getItem("walletKeystore"); // Remove saved keystore from localStorage
   console.log(isKeystoreExist);
 
   return (
