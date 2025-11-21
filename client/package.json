@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "pnpm build",
-    "start": "serve -s dist",
+    "build": "tsc -b && vite build",
+    "start": "serve -s dist -l $PORT",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest --coverage"
