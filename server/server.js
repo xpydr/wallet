@@ -10,8 +10,13 @@ dotenv.config();
 const apiKey = process.env.API_KEY;
 const port = process.env.PORT || 3000;
 
+const allowedOrigins = [
+  'http://localhost:5173', // dev
+  'https://wallet-client-45bdfca79764.herokuapp.com' // production
+];
+
 const app = express();
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 app.listen(port, () => { console.log(`Server running on port ${port}`) });
 
