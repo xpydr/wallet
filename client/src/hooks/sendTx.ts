@@ -8,7 +8,7 @@ export default async function sendTx(to: string, value: string, mnemonic: string
     const myWallet: ethers.HDNodeWallet = ethers.Wallet.fromPhrase(mnemonic);
 
     const txData = await getTxData(myWallet.address);
-    if (!txData.nonce || !txData.feeData) throw new Error("Error fetching fee data");
+    if (txData.nonce == null || txData.feeData == null) throw new Error("Error fetching fee data");
 
     const nonce = txData.nonce;
     const maxFeePerGas = txData.feeData.maxFeePerGas;
