@@ -6,7 +6,7 @@ A secure, full-stack Ethereum wallet built with modern web technologies, emphasi
 
 - Generate new Ethereum wallets (mnemonic-based)
 - Import existing wallets via mnemonic or encrypted JSON keystore
-- Securely encrypt and store the `ethers.Wallet` JSON keystore using a user-defined password (PBKDF2 + AES)
+- Securely encrypt and store the `ethers.Wallet` JSON keystore using a user-defined password (scrypt + AES)
 - View real-time native ETH balance with manual refresh
 - Send ETH transactions (signed entirely in the browser)
 - Export mnemonic or encrypted keystore at any time
@@ -31,34 +31,33 @@ A secure, full-stack Ethereum wallet built with modern web technologies, emphasi
 - Express.js
 - ethers.js v6
 
-
 ## Quick Start
-
 ### Prerequisites
 - Node.js ≥ 18
 - pnpm
-
-### Installation
-
-# Clone the repository
+### Clone the repository
+```bash
 git clone https://github.com/xpdyr/wallet.git
 cd wallet
-
-# Install dependencies for both client and server
+```
+### Install dependencies for both client and server
+```bash
 cd client && pnpm install
 cd ../server && pnpm install
+```
 
-### Development
-
-# Terminal 1 - Frontend (Vite dev server)
+## Development
+### Terminal 1 - Frontend (Vite dev server)
+```bash
 cd client
 npm run dev
-
-# Terminal 2 - Backend (Express server)
+```
+### Terminal 2 - Backend (Express server)
+```bash
 cd server
 npm start
-
-### Security Model 
+```
+## Security Model 
 1. Wallet creation/import happens entirely in the browser.
 2. The ethers.Wallet instance is encrypted client-side using wallet.encrypt(password) with scrypt and AES-128-CTR.
 3. The encrypted JSON is stored in localStorage.
@@ -66,19 +65,19 @@ npm start
 5. Transaction signing uses the in-memory wallet instance.
 6. No private key or mnemonic is ever sent to the backend.
 
-### Environment Variables
-## Client
+## Environment Variables
+### Client
 VITE_API_URL = http://localhost:3000/api/v1 (Adjust port as needed)
-## Server
+### Server
 API_KEY = (Free key available through Alchemy for RPC)
 PORT = 3000 
 
-### Contributing
+## Contributing
 Contributions are welcome. Please open an issue first to discuss major changes.
 1. Fork the repository
 2. Create a feature branch
 3. Commit changes
 4. Push and open a Pull Request
 
-### License
+## License
 This project is licensed under the MIT License – see the LICENSE file for details.
